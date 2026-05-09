@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { addToSchedule } from "../lib/schedule";
-import { useLanguage } from "../lib/i18n";
+import { useLanguage, ZH_TAGS, ZH_VIBES, ZH_TIMES, ZH_BUDGETS, ZH_NEIGHBOURHOODS } from "../lib/i18n";
 
 const NEIGHBOURHOODS = ["All Taipei", "Da-an", "Xinyi", "Zhongshan", "Shilin", "Beitou", "Songshan", "Wanhua", "Neihu", "Tamsui"];
 const BUDGETS = ["$ Budget (NT$0-300)", "$$ Medium (NT$300-800)", "$$$ Upscale (NT$800-2000)", "$$$$ Luxury (NT$2000+)"];
@@ -237,7 +237,7 @@ interface Venue {
 const CATEGORY_KEYS = ["catFood","catArts","catCreative","catEntertainment","catActive","catChill"] as const;
 
 export default function IdeasPage() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [neighbourhood, setNeighbourhood] = useState("All Taipei");
   const [budget, setBudget] = useState("$$ Medium (NT$300-800)");
   const [vibe, setVibe] = useState("Casual");
@@ -335,7 +335,7 @@ export default function IdeasPage() {
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
-                {n}
+                {lang === "zh" ? (ZH_NEIGHBOURHOODS[n] ?? n) : n}
               </button>
             ))}
           </div>
@@ -350,7 +350,7 @@ export default function IdeasPage() {
               onChange={(e) => setBudget(e.target.value)}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-1 focus:ring-[#be3a4a]"
             >
-              {BUDGETS.map((b) => <option key={b}>{b}</option>)}
+              {BUDGETS.map((b) => <option key={b} value={b}>{lang === "zh" ? (ZH_BUDGETS[b] ?? b) : b}</option>)}
             </select>
           </div>
           <div>
@@ -360,7 +360,7 @@ export default function IdeasPage() {
               onChange={(e) => setVibe(e.target.value)}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-1 focus:ring-[#be3a4a]"
             >
-              {VIBES.map((v) => <option key={v}>{v}</option>)}
+              {VIBES.map((v) => <option key={v} value={v}>{lang === "zh" ? (ZH_VIBES[v] ?? v) : v}</option>)}
             </select>
           </div>
           <div>
@@ -370,7 +370,7 @@ export default function IdeasPage() {
               onChange={(e) => setTimeOfDay(e.target.value)}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-1 focus:ring-[#be3a4a]"
             >
-              {TIMES.map((t) => <option key={t}>{t}</option>)}
+              {TIMES.map((tm) => <option key={tm} value={tm}>{lang === "zh" ? (ZH_TIMES[tm] ?? tm) : tm}</option>)}
             </select>
           </div>
         </div>
@@ -412,7 +412,7 @@ export default function IdeasPage() {
                               : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                           }`}
                         >
-                          {i}
+                          {lang === "zh" ? (ZH_TAGS[i] ?? i) : i}
                         </button>
                       );
                     })}
