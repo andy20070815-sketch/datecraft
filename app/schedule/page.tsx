@@ -17,6 +17,28 @@ const STATUS_NEXT: Record<ScheduledDate["status"], ScheduledDate["status"]> = {
   planned: "confirmed", confirmed: "completed", completed: "planned",
 };
 
+function buildGCalUrl(d: ScheduledDate): string {
+  const title = encodeURIComponent(d.title);
+  const location = encodeURIComponent(d.address || d.venueName || "");
+  const notes = encodeURIComponent(d.notes || "");
+  let dates = "";
+  if (d.date) {
+    const base = d.date.replace(/-/g, "");
+    if (d.time) {
+      const [h, m] = d.time.split(":").map(Number);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      const start = `${base}T${pad(h)}${pad(m)}00`;
+      const end   = `${base}T${pad(h + 1)}${pad(m)}00`;
+      dates = `${start}/${end}`;
+    } else {
+      const next = new Date(d.date + "T00:00:00");
+      next.setDate(next.getDate() + 1);
+      dates = `${base}/${next.toISOString().slice(0, 10).replace(/-/g, "")}`;
+    }
+  }
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&location=${location}&details=${notes}`;
+}
+
 function formatDate(iso: string) {
   if (!iso) return { month: "—", day: "—" };
   const d = new Date(iso + "T00:00:00");
@@ -165,8 +187,13 @@ export default function SchedulePage() {
                     </span>
                   </div>
                   {d.notes && <p className="text-sm text-gray-500 flex gap-1.5 mb-3"><span className="text-[#be3a4a]">✦</span>{d.notes}</p>}
-                  <div className="flex items-center gap-4 no-print">
+                  <div className="flex items-center gap-4 no-print flex-wrap">
                     {d.mapsLink && <a href={d.mapsLink} target="_blank" rel="noopener noreferrer" className="text-sm text-[#be3a4a] font-medium hover:underline">{t.viewOnMaps}</a>}
+                    {d.date && (
+                      <a href={buildGCalUrl(d)} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-500 font-medium hover:text-[#be3a4a] transition-colors">
+                        📅 {t.addToGCal}
+                      </a>
+                    )}
                     {cancelId === d.id ? (
                       <span className="flex items-center gap-2 text-sm">
                         <span className="text-gray-500">{t.removeConfirm}</span>

@@ -263,6 +263,7 @@ export const T = {
     cancelDate: "Cancel date", removeConfirm: "Remove this date?",
     yesRemove: "Yes, remove", keep: "Keep",
     upcoming: "upcoming",
+    addToGCal: "Add to Google Calendar",
     exportPdf: "Export PDF", share: "Share",
     shareSuccess: "Copied to clipboard!",
     // Modals
@@ -297,6 +298,7 @@ export const T = {
     cancelDate: "取消約會", removeConfirm: "確定移除嗎？",
     yesRemove: "確定移除", keep: "保留",
     upcoming: "個即將到來",
+    addToGCal: "加入 Google 日曆",
     exportPdf: "匯出 PDF", share: "分享",
     shareSuccess: "已複製到剪貼簿！",
     // Modals
