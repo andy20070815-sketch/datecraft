@@ -263,6 +263,8 @@ export default function IdeasPage() {
   const [schedTime, setSchedTime] = useState("");
   const [schedNotes, setSchedNotes] = useState("");
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const [aiQuery, setAiQuery] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
 
   const budgetLevel = budget.match(/^\$+/)?.[0] ?? "$$";
 
@@ -300,14 +302,15 @@ export default function IdeasPage() {
     );
   }
 
-  async function findSpots() {
+  async function findSpots(params?: { neighbourhood: string; budget: string; vibe: string; timeOfDay: string; interests: string[] }) {
     setLoading(true);
     setSearched(true);
+    const body = params ?? { neighbourhood, budget, vibe, timeOfDay, interests };
     try {
       const res = await fetch("/api/find-date-spots", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ neighbourhood, budget, vibe, timeOfDay, interests }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       setVenues(data.venues ?? []);
@@ -319,11 +322,75 @@ export default function IdeasPage() {
     }
   }
 
+  async function handleAiSearch(query?: string) {
+    const q = (query ?? aiQuery).trim();
+    if (!q) return;
+    setAiLoading(true);
+    try {
+      const res = await fetch("/api/parse-query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: q }),
+      });
+      const params = await res.json();
+      setNeighbourhood(params.neighbourhood);
+      setBudget(params.budget);
+      setVibe(params.vibe);
+      setTimeOfDay(params.timeOfDay);
+      setInterests(params.interests ?? []);
+      await findSpots(params);
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
       <div className="text-sm text-[#be3a4a] font-medium mb-1">📍 Taipei City, Taiwan</div>
       <h1 className="text-3xl font-bold text-gray-900 mb-1">{t.pageTitle}</h1>
       <p className="text-gray-500 mb-8">{t.pageSubtitle}</p>
+
+      {/* AI search bar */}
+      {(() => {
+        const prompts = lang === "zh"
+          ? ["浪漫晚餐約會", "第一次見面", "美食探索之旅", "戶外冒險約會", "文藝下午茶", "放鬆咖啡廳約會"]
+          : ["Romantic dinner date", "Fun first date", "Foodie adventure", "Outdoor active date", "Artsy cultural day", "Chill café hopping"];
+        return (
+          <div className="mb-6">
+            <div className="flex gap-2">
+              <input
+                value={aiQuery}
+                onChange={(e) => setAiQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAiSearch()}
+                placeholder={lang === "zh" ? "✦ 描述你理想的約會..." : "✦ Describe your ideal date..."}
+                className="flex-1 bg-white border border-gray-200 rounded-full px-5 py-3 text-sm focus:outline-none focus:border-[#be3a4a] shadow-sm"
+                disabled={aiLoading}
+              />
+              <button
+                onClick={() => handleAiSearch()}
+                disabled={!aiQuery.trim() || aiLoading}
+                className="bg-[#be3a4a] text-white px-5 py-3 rounded-full text-sm font-medium hover:bg-[#a3303f] transition-colors disabled:opacity-40 flex items-center gap-1.5"
+              >
+                {aiLoading
+                  ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
+                  : "✦"}
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-3">
+              {prompts.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => { setAiQuery(p); handleAiSearch(p); }}
+                  disabled={aiLoading}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium bg-white border border-gray-200 text-gray-600 hover:border-[#be3a4a] hover:text-[#be3a4a] transition-colors shadow-sm disabled:opacity-40"
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Filter card */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
@@ -434,7 +501,7 @@ export default function IdeasPage() {
         </div>
 
         <button
-          onClick={findSpots}
+          onClick={() => findSpots()}
           disabled={loading}
           className="bg-[#be3a4a] text-white px-5 py-2.5 rounded-full font-medium text-sm hover:bg-[#a3303f] transition-colors disabled:opacity-60 flex items-center gap-2"
         >

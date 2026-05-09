@@ -23,9 +23,6 @@ export default function NavBar() {
         <Link href="/ideas" className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${pathname === "/ideas" ? "bg-[#be3a4a] text-white" : "text-gray-600 hover:text-gray-900"}`}>
           {t.ideas}
         </Link>
-        <Link href="/ask" className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${pathname === "/ask" ? "bg-[#be3a4a] text-white" : "text-gray-600 hover:text-gray-900"}`}>
-          {t.askAi}
-        </Link>
         <button
           onClick={toggle}
           className="ml-2 px-3 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-600 hover:border-gray-400 transition-colors"
