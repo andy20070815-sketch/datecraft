@@ -42,7 +42,8 @@ const INTEREST_TYPE: Record<string, string> = {
     "Dinner Theater","Pop-up Dinner","Charcuterie Date",
     "Soup Dumplings","Tteokbokki","Korean Fried Chicken","Bingsoo",
     "Kimchi Making Class","Mochi Making","Dumpling Making","Cheese Making Class",
-    "Braised Beef Brisket",
+    "Braised Beef Brisket","Steakhouse","Wagyu Beef Dinner","AYCE Buffet",
+    "Hot Pot Buffet","Vegetarian Restaurant",
   ].map((k) => [k, "restaurant"])),
   // Bars
   ...Object.fromEntries([
@@ -54,6 +55,8 @@ const INTEREST_TYPE: Record<string, string> = {
     "Cheese Board","Cocktail Making Class","Beer Brewing Workshop","Music Jam Session",
     "Storytelling Night","Spoken Word Night","Retro Gaming Bar","Ping Pong Bar",
     "Shuffleboard Bar","Speed Dating","Silent Disco",
+    "Sports Bar","Sky Bar","Rooftop Bar","Hotel Bar",
+    "Electronic Music Night","Darts League","Sports Viewing",
   ].map((k) => [k, "bar"])),
   // Cafes
   ...Object.fromEntries([
@@ -65,7 +68,7 @@ const INTEREST_TYPE: Record<string, string> = {
     "Manga Café","Rooftop Café","Journaling Café","Garden Café","Greenhouse Café",
     "Herbal Tea Tasting","Coffee Brewing Class","Tea Ceremony","Chocolate Making",
     "Pet Café","Board Games","Creative Writing",
-    "Tanghulu Walk","Egg Tart Café","Eye Mask Café","Puzzle Café",
+    "Tanghulu Walk","Egg Tart Café","Eye Mask Café","Puzzle Café","E-Sports Café",
   ].map((k) => [k, "cafe"])),
   // Bakeries
   "Bakery Hopping": "bakery", "Baking Class": "bakery", "Bread Baking": "bakery",
@@ -91,6 +94,7 @@ const INTEREST_TYPE: Record<string, string> = {
     "Art Gallery","Photography Exhibition","Pop Art Exhibition","Illustration Exhibition",
     "Light Art Installation","Painting Workshop","Watercolor Class","Life Drawing Class",
     "Animation Exhibition","Illustration Class","Acrylic Pour",
+    "Botanical Illustration","Art Fair","Immersive Exhibition",
   ].map((k) => [k, "art_gallery"])),
   // Movie theaters
   ...Object.fromEntries([
@@ -104,21 +108,26 @@ const INTEREST_TYPE: Record<string, string> = {
     "Float Tank","Sound Bath","Hammam","Contrast Therapy","Reiki Session",
     "Chakra Workshop","Couples Skincare","Gua Sha Facial","Hot Springs",
     "Jimjilbang","Korean Spa","Bath Bomb Making","Sound Healing","Perfume Blending",
+    "Thai Massage","Hot Stone Massage","Aromatherapy","Reflexology","Acupuncture",
+    "Body Scrub","Facial Treatment",
   ].map((k) => [k, "spa"])),
   // Gyms / fitness
   ...Object.fromEntries([
     "Yoga","Hot Yoga","Aerial Yoga","Pilates Class","Barre Class","Breathwork",
-    "Meditation Class","Dance Class","Rock Climbing","Badminton","Table Tennis",
+    "Meditation Class","Dance Class","Rock Climbing","Badminton","Table Tennis","Tennis",
     "Ukulele Class","Swimming","Boxing Class","Muay Thai Class","Fencing Class",
     "Wrestling Class","Indoor Basketball","Indoor Rock Climbing","Bouldering",
     "Parkour Class","Acrobatics Class","Gymnastics Class",
+    "CrossFit","Fitness Boot Camp","Tai Chi","Capoeira","Aerial Arts",
   ].map((k) => [k, "gym"])),
   // Specific place types
   "Karaoke": "karaoke",
   "Bowling": "bowling_alley",
   "Shopping": "shopping_mall", "Antique Market": "shopping_mall", "Indie Market": "shopping_mall",
   "Flea Market": "shopping_mall", "Craft Fair": "shopping_mall",
-  "Nail Art": "beauty_salon",
+  "Nail Art": "beauty_salon", "Hair Spa": "beauty_salon",
+  "Manicure & Pedicure": "beauty_salon", "Eyelash Extension": "beauty_salon",
+  "Brow Lamination": "beauty_salon", "Traditional Chinese Medicine": "beauty_salon",
   "Zoo Date": "zoo", "Night Safari": "zoo",
   "Aquarium Visit": "tourist_attraction",
   "Flower Arranging": "florist", "Ikebana": "florist",
@@ -166,7 +175,15 @@ const INTEREST_TYPE: Record<string, string> = {
   "Cycling Tour": "tourist_attraction", "E-bike Tour": "tourist_attraction",
   "Wakeboarding": "tourist_attraction", "Paddleboarding Tour": "tourist_attraction",
   // Niche outdoor sports: no type restriction so text query finds the right operator
-  "BMX Park": "park", "Skateboarding": "park",
+  "BMX Park": "park", "Skateboarding": "park", "Mountain Biking": "park",
+  "Running Club": "park",
+  "Golf Driving Range": "tourist_attraction", "Dragon Boat Racing": "tourist_attraction",
+  "Rock Concert": "tourist_attraction", "Indie Concert": "tourist_attraction",
+  "Music Festival": "tourist_attraction", "Immersive Theater": "tourist_attraction",
+  "Karaoke Box": "karaoke", "Rhythm Game": "amusement_center",
+  "Knitting Class": "tourist_attraction", "Crochet Workshop": "tourist_attraction",
+  "Spray Paint Art": "tourist_attraction", "Digital Art Workshop": "tourist_attraction",
+  "Ceramics Studio": "tourist_attraction",
   // New cultural
   "Graffiti Tour": "tourist_attraction", "Lantern Festival": "tourist_attraction",
   "MRT Hopping": "tourist_attraction", "Xinyi Nightlife": "bar",
