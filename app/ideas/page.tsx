@@ -265,6 +265,8 @@ export default function IdeasPage() {
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const [aiQuery, setAiQuery] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
+  type ApiMessage = { role: "user" | "assistant"; content: string };
+  const [conv, setConv] = useState<{ question: string; options: string[]; messages: ApiMessage[] } | null>(null);
 
   const budgetLevel = budget.match(/^\$+/)?.[0] ?? "$$";
 
@@ -322,26 +324,66 @@ export default function IdeasPage() {
     }
   }
 
+  async function callParseQuery(messages: { role: "user" | "assistant"; content: string }[]) {
+    const res = await fetch("/api/parse-query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages }),
+    });
+    return res.json() as Promise<
+      | { type: "question"; text: string; options: string[] }
+      | { type: "search"; text: string; params: { neighbourhood: string; budget: string; vibe: string; timeOfDay: string; interests: string[] } }
+    >;
+  }
+
   async function handleAiSearch(query?: string) {
     const q = (query ?? aiQuery).trim();
     if (!q) return;
+    setConv(null);
     setAiLoading(true);
+    const messages: { role: "user" | "assistant"; content: string }[] = [
+      { role: "user", content: q },
+    ];
     try {
-      const res = await fetch("/api/parse-query", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: q }),
-      });
-      const params = await res.json();
-      setNeighbourhood(params.neighbourhood);
-      setBudget(params.budget);
-      setVibe(params.vibe);
-      setTimeOfDay(params.timeOfDay);
-      setInterests(params.interests ?? []);
-      await findSpots(params);
+      const data = await callParseQuery(messages);
+      if (data.type === "question") {
+        setConv({ question: data.text, options: data.options, messages });
+      } else {
+        applyParamsAndSearch(data.params);
+      }
     } finally {
       setAiLoading(false);
     }
+  }
+
+  async function handleOptionClick(option: string) {
+    if (!conv) return;
+    const messages: { role: "user" | "assistant"; content: string }[] = [
+      ...conv.messages,
+      { role: "assistant", content: JSON.stringify({ type: "question", text: conv.question, options: conv.options }) },
+      { role: "user", content: option },
+    ];
+    setConv(null);
+    setAiLoading(true);
+    try {
+      const data = await callParseQuery(messages);
+      if (data.type === "question") {
+        setConv({ question: data.text, options: data.options, messages });
+      } else {
+        applyParamsAndSearch(data.params);
+      }
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
+  function applyParamsAndSearch(params: { neighbourhood: string; budget: string; vibe: string; timeOfDay: string; interests: string[] }) {
+    setNeighbourhood(params.neighbourhood);
+    setBudget(params.budget);
+    setVibe(params.vibe);
+    setTimeOfDay(params.timeOfDay);
+    setInterests(params.interests ?? []);
+    findSpots(params);
   }
 
   return (
@@ -357,37 +399,60 @@ export default function IdeasPage() {
           : ["Romantic dinner date", "Fun first date", "Foodie adventure", "Outdoor active date", "Artsy cultural day", "Chill café hopping"];
         return (
           <div className="mb-6">
+            {/* Input bar */}
             <div className="flex gap-2">
               <input
                 value={aiQuery}
                 onChange={(e) => setAiQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAiSearch()}
+                onKeyDown={(e) => { if (e.key === "Enter") { setConv(null); handleAiSearch(); } }}
                 placeholder={lang === "zh" ? "✦ 描述你理想的約會..." : "✦ Describe your ideal date..."}
                 className="flex-1 bg-white border border-gray-200 rounded-full px-5 py-3 text-sm focus:outline-none focus:border-[#be3a4a] shadow-sm"
                 disabled={aiLoading}
               />
               <button
-                onClick={() => handleAiSearch()}
+                onClick={() => { setConv(null); handleAiSearch(); }}
                 disabled={!aiQuery.trim() || aiLoading}
-                className="bg-[#be3a4a] text-white px-5 py-3 rounded-full text-sm font-medium hover:bg-[#a3303f] transition-colors disabled:opacity-40 flex items-center gap-1.5"
+                className="bg-[#be3a4a] text-white px-5 py-3 rounded-full text-sm font-medium hover:bg-[#a3303f] transition-colors disabled:opacity-40 flex items-center"
               >
                 {aiLoading
                   ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
                   : "✦"}
               </button>
             </div>
-            <div className="flex flex-wrap gap-2 mt-3">
-              {prompts.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => { setAiQuery(p); handleAiSearch(p); }}
-                  disabled={aiLoading}
-                  className="px-3 py-1.5 rounded-full text-xs font-medium bg-white border border-gray-200 text-gray-600 hover:border-[#be3a4a] hover:text-[#be3a4a] transition-colors shadow-sm disabled:opacity-40"
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
+
+            {/* Follow-up question with clickable options */}
+            {conv && (
+              <div className="mt-3 bg-white border border-gray-100 rounded-2xl shadow-sm p-4">
+                <p className="text-sm font-medium text-gray-800 mb-3">{conv.question}</p>
+                <div className="flex flex-wrap gap-2">
+                  {conv.options.map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => handleOptionClick(opt)}
+                      disabled={aiLoading}
+                      className="px-4 py-1.5 rounded-full text-sm font-medium bg-gray-50 border border-gray-200 text-gray-700 hover:border-[#be3a4a] hover:text-[#be3a4a] hover:bg-rose-50 transition-colors disabled:opacity-40"
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quick prompt chips — only show when no active conversation */}
+            {!conv && !aiLoading && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {prompts.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => { setAiQuery(p); handleAiSearch(p); }}
+                    className="px-3 py-1.5 rounded-full text-xs font-medium bg-white border border-gray-200 text-gray-600 hover:border-[#be3a4a] hover:text-[#be3a4a] transition-colors shadow-sm"
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         );
       })()}
