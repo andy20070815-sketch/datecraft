@@ -96,12 +96,13 @@ const INTEREST_TYPE: Record<string, string> = {
     "Animation Exhibition","Illustration Class","Acrylic Pour",
     "Botanical Illustration","Art Fair","Immersive Exhibition",
   ].map((k) => [k, "art_gallery"])),
-  // Movie theaters
+  // Movie theaters — only mainstream cinema types reliably tagged as movie_theater
   ...Object.fromEntries([
-    "Film","Theater","Art House Cinema","Rooftop Cinema","Outdoor Cinema","Film Club","Anime Screening",
+    "Film","Art House Cinema","Film Club","Anime Screening",
   ].map((k) => [k, "movie_theater"])),
-  // Comedy clubs
-  "Comedy Show": "comedy_club", "Improv Show": "comedy_club",
+  // Performance & comedy: no type restriction — these happen at bars, theaters, event spaces
+  // "comedy_club" and "movie_theater" are too rare in Taipei to use as filters
+  // (Comedy Show, Improv Show, Theater, Rooftop Cinema, Outdoor Cinema → unconstrained text search)
   // Spas / wellness
   ...Object.fromEntries([
     "Spa & Wellness","Couples Massage","Foot Massage","Sauna","Infrared Sauna",
