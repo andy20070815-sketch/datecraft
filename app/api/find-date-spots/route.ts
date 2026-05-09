@@ -234,9 +234,9 @@ const SEARCH_QUERY: Record<string, string> = {
   "Hot Air Balloon":      "hot air balloon ride",
   "Zip Line":             "zip line canopy adventure",
   // Entertainment & performance
-  "Comedy Show":          "stand-up comedy show",
-  "Stand-up Comedy":      "stand-up comedy open mic",
-  "Improv Show":          "improv comedy theater",
+  "Comedy Show":          "脫口秀 stand-up comedy show",
+  "Stand-up Comedy":      "脫口秀 stand-up comedy",
+  "Improv Show":          "即興喜劇 improv comedy",
   "Drag Show":            "drag queen show performance",
   "Drag Brunch":          "drag brunch show entertainment",
   "Roast Night":          "comedy roast night",
@@ -379,7 +379,35 @@ const VIBE_TYPE: Record<string, string> = {
   Cultural:    "tourist_attraction",
   Foodie:      "restaurant",
   Nightlife:   "bar",
-  // Casual / Romantic → no restriction (intentionally omitted)
+};
+
+// When no interests are selected, fire these preset interests per vibe
+// so results are always relevant and varied (replaces the old 2-query generic approach)
+const VIBE_INTERESTS: Record<string, string[]> = {
+  Adventurous: [
+    "Mountain Hiking", "Rock Climbing", "Escape Room", "Kayaking",
+    "Laser Tag", "Bouldering", "Trail Running", "Archery", "Go-Kart Racing",
+  ],
+  Cultural: [
+    "Art Gallery", "Museum", "Temple Visit", "Tea Ceremony",
+    "History Walk", "Design Museum", "Photography Exhibition", "Architecture Walk", "Classical Concert",
+  ],
+  Foodie: [
+    "Omakase", "Night Market", "Fine Dining", "Ramen", "Dim Sum",
+    "Craft Beer", "Specialty Coffee", "Korean BBQ", "Street Food",
+  ],
+  Nightlife: [
+    "Cocktail Bar", "Jazz Club", "Karaoke", "Live Music",
+    "Night Market Crawl", "Listening Bar", "Whisky Bar", "Rooftop Bar", "Comedy Show",
+  ],
+  Casual: [
+    "Specialty Coffee", "Book Café", "Board Games", "Brunch",
+    "Bubble Tea", "Cat Café", "Afternoon Tea", "Bookstore", "Garden Café",
+  ],
+  Romantic: [
+    "Rooftop Dining", "Wine Bar", "Couples Massage", "Sunset Watching",
+    "Omakase", "Champagne Bar", "Flower Arranging", "Dessert Omakase", "Botanical Garden",
+  ],
 };
 
 interface NewPlace {
@@ -479,15 +507,15 @@ export async function POST(req: NextRequest) {
       retries.forEach((set) => set.forEach((p) => ingest(p, 1)));
     }
   } else {
-    // Vibe mode: broad context queries + fallback filler
-    const contextQueries = [
-      { query: `${vibe} date spot ${loc}`,      type: VIBE_TYPE[vibe] },
-      ...(timeOfDay !== "Any time"
-        ? [{ query: `${timeOfDay} ${vibe} ${loc}`, type: VIBE_TYPE[vibe] }]
-        : []),
-    ];
+    // Vibe mode: fire preset interests for this vibe — gives far more relevant results
+    // than the old 2-query generic approach
+    const presets = VIBE_INTERESTS[vibe] ?? [];
+    const vibeQueries = presets.map((i) => ({
+      query: `${SEARCH_QUERY[i] ?? i} ${loc}`,
+      type:  INTEREST_TYPE[i],
+    }));
     const sets = await Promise.all(
-      contextQueries.map(({ query, type }) =>
+      vibeQueries.map(({ query, type }) =>
         searchText(query, coords.lat, coords.lng, priceLevels, type)
       )
     );
