@@ -115,11 +115,13 @@ const INTEREST_TYPE: Record<string, string> = {
   ...Object.fromEntries([
     "Yoga","Hot Yoga","Aerial Yoga","Pilates Class","Barre Class","Breathwork",
     "Meditation Class","Dance Class","Rock Climbing","Badminton","Table Tennis","Tennis",
-    "Ukulele Class","Swimming","Boxing Class","Muay Thai Class","Fencing Class",
-    "Wrestling Class","Indoor Basketball","Indoor Rock Climbing","Bouldering",
-    "Parkour Class","Acrobatics Class","Gymnastics Class",
-    "CrossFit","Fitness Boot Camp","Tai Chi","Capoeira","Aerial Arts",
+    "Swimming","Boxing Class","Muay Thai Class","Fencing Class","Wrestling Class",
+    "Indoor Basketball","Indoor Rock Climbing","Bouldering","CrossFit","Fitness Boot Camp",
   ].map((k) => [k, "gym"])),
+  // These studios have distinct enough names that no type restriction works better
+  "Tai Chi": "park", "Aerial Arts": "tourist_attraction",
+  "Capoeira": "tourist_attraction", "Parkour Class": "tourist_attraction",
+  "Acrobatics Class": "tourist_attraction", "Gymnastics Class": "tourist_attraction",
   // Specific place types
   "Karaoke": "karaoke",
   "Bowling": "bowling_alley",
@@ -134,13 +136,15 @@ const INTEREST_TYPE: Record<string, string> = {
   "Plant Shopping": "florist", "Flower Market Visit": "florist",
   "Bookstore": "book_store", "Vinyl Record Shop": "book_store",
   "Record Store Digging": "book_store",
-  // Amusement / entertainment centres
+  // amusement_center: only the activities Google reliably tags this way
   ...Object.fromEntries([
-    "Escape Room","VR Escape Room","Arcade","VR Gaming","Mini Golf","Glow Golf",
-    "Laser Tag","Paintball","Archery","Go-Kart Racing","Axe Throwing","Shooting Range",
-    "Trampoline Park","Inflatable Park","Rage Room","Claw Machine Café","Pinball Bar",
-    "Batting Cage","Neon Sign Making",
+    "Escape Room","VR Escape Room","Arcade","VR Gaming",
+    "Laser Tag","Trampoline Park","Inflatable Park","Rage Room",
+    "Mini Golf","Glow Golf","Batting Cage","Rhythm Game",
   ].map((k) => [k, "amusement_center"])),
+  // Sports/action venues: no type restriction — text query is specific enough
+  // Paintball, Archery, Axe Throwing, Go-Kart Racing, Shooting Range intentionally omitted
+  "Pinball Bar": "bar", "Claw Machine Café": "cafe", "Neon Sign Making": "tourist_attraction",
   // Amusement parks
   "Amusement Park": "amusement_park", "Waterpark": "amusement_park",
   // Florists
@@ -164,7 +168,7 @@ const INTEREST_TYPE: Record<string, string> = {
   "Opera Night": "tourist_attraction", "Ballet Performance": "tourist_attraction",
   "Dance Performance": "tourist_attraction", "Circus Show": "tourist_attraction",
   "Magic Show": "tourist_attraction", "Haunted House": "tourist_attraction",
-  "Ice Skating": "tourist_attraction", "Roller Skating": "tourist_attraction",
+  "Ice Skating": "amusement_center", "Roller Skating": "amusement_center",
   "Zip Line": "tourist_attraction", "Butterfly Garden": "tourist_attraction",
   // New craft & workshop experiences
   "Kintsugi Workshop": "tourist_attraction", "Bookbinding": "tourist_attraction",
