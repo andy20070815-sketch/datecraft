@@ -194,11 +194,8 @@ interface NewPlace {
   googleMapsUri?: string;
 }
 
-// Price levels only apply to commercial venues; parks, museums, etc. have no price data in Google
-const PRICE_LEVEL_TYPES = new Set([
-  "restaurant","bar","cafe","spa","gym","karaoke","bowling_alley",
-  "beauty_salon","amusement_center","amusement_park","movie_theater","bakery","shopping_mall",
-]);
+// Only restaurants, bars, and cafes reliably have price level data in Google Places
+const PRICE_LEVEL_TYPES = new Set(["restaurant", "bar", "cafe", "bakery"]);
 
 async function searchText(
   query: string,
@@ -246,62 +243,52 @@ export async function POST(req: NextRequest) {
   const loc          = neighbourhood === "All Taipei" ? "Taipei" : `${neighbourhood} Taipei`;
   const interestList: string[] = interests ?? [];
 
-  // Interest queries: each fires with its strict place-type constraint
-  const interestQueries = interestList.slice(0, 15).map((i) => ({
-    query: `${i} ${loc}`,
-    type:  INTEREST_TYPE[i],        // undefined = no type restriction (workshops, unique spots)
-  }));
-
-  // Context queries: broad vibe/time fallback, also type-constrained where sensible
-  const contextQueries = [
-    { query: `${vibe} date spot ${loc}`,      type: VIBE_TYPE[vibe] },
-    ...(timeOfDay !== "Any time"
-      ? [{ query: `${timeOfDay} ${vibe} ${loc}`, type: VIBE_TYPE[vibe] }]
-      : []),
-  ];
-
-  // Fire all in parallel
-  const [interestSets, contextSets] = await Promise.all([
-    Promise.all(interestQueries.map(({ query, type }) =>
-      searchText(query, coords.lat, coords.lng, priceLevels, type)
-    )),
-    Promise.all(contextQueries.map(({ query, type }) =>
-      searchText(query, coords.lat, coords.lng, priceLevels, type)
-    )),
-  ]);
-
-  // Score: +1 per interest query that returned this place
   const scoreMap = new Map<string, number>();
   const placeMap = new Map<string, NewPlace>();
 
-  interestSets.forEach((set) =>
-    set.forEach((p) => {
-      if (!p.id || !p.displayName?.text) return;
-      placeMap.set(p.id, p);
-      scoreMap.set(p.id, (scoreMap.get(p.id) ?? 0) + 1);
-    })
-  );
-  contextSets.forEach((set) =>
-    set.forEach((p) => {
-      if (!p.id || !p.displayName?.text) return;
-      placeMap.set(p.id, p);
-      if (!scoreMap.has(p.id)) scoreMap.set(p.id, 0);
-    })
-  );
+  function ingest(p: NewPlace, score: number) {
+    if (!p.id || !p.displayName?.text) return;
+    placeMap.set(p.id, p);
+    scoreMap.set(p.id, Math.max(scoreMap.get(p.id) ?? 0, score));
+  }
 
-  // Top up if price filtering left too few results
-  if (placeMap.size < 6) {
-    const fallback = await searchText(`${vibe} ${loc}`, coords.lat, coords.lng, [], VIBE_TYPE[vibe]);
-    fallback.forEach((p) => {
-      if (!p.id || !p.displayName?.text || placeMap.has(p.id)) return;
-      placeMap.set(p.id, p);
-      scoreMap.set(p.id, 0);
-    });
+  if (interestList.length > 0) {
+    // Interest mode: fire one query per interest, only keep venues that matched
+    const interestQueries = interestList.slice(0, 15).map((i) => ({
+      query: `${i} ${loc}`,
+      type:  INTEREST_TYPE[i],
+    }));
+    const sets = await Promise.all(
+      interestQueries.map(({ query, type }) =>
+        searchText(query, coords.lat, coords.lng, priceLevels, type)
+      )
+    );
+    sets.forEach((set) => set.forEach((p) => ingest(p, 1)));
+    // No context queries, no fallback — only show what actually matched
+  } else {
+    // Vibe mode: broad context queries + fallback filler
+    const contextQueries = [
+      { query: `${vibe} date spot ${loc}`,      type: VIBE_TYPE[vibe] },
+      ...(timeOfDay !== "Any time"
+        ? [{ query: `${timeOfDay} ${vibe} ${loc}`, type: VIBE_TYPE[vibe] }]
+        : []),
+    ];
+    const sets = await Promise.all(
+      contextQueries.map(({ query, type }) =>
+        searchText(query, coords.lat, coords.lng, priceLevels, type)
+      )
+    );
+    sets.forEach((set) => set.forEach((p) => ingest(p, 0)));
+
+    if (placeMap.size < 6) {
+      const fallback = await searchText(`${vibe} ${loc}`, coords.lat, coords.lng, [], VIBE_TYPE[vibe]);
+      fallback.forEach((p) => ingest(p, 0));
+    }
   }
 
   if (placeMap.size === 0) return NextResponse.json({ venues: [], relevantCount: 0 });
 
-  // Sort: interest match score (desc) → rating (desc)
+  // Sort by rating when all scores are equal (interest mode), or score→rating (vibe mode)
   const sorted = [...placeMap.values()].sort((a, b) => {
     const sa = scoreMap.get(a.id) ?? 0;
     const sb = scoreMap.get(b.id) ?? 0;
@@ -309,9 +296,7 @@ export async function POST(req: NextRequest) {
     return (b.rating ?? 0) - (a.rating ?? 0);
   });
 
-  const relevantCount = interestList.length > 0
-    ? sorted.filter((p) => (scoreMap.get(p.id) ?? 0) > 0).length
-    : sorted.length;
+  const relevantCount = sorted.length;
 
   const venues = sorted.map((p) => ({
     place_id:    p.id,
