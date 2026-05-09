@@ -130,7 +130,7 @@ const INTEREST_TYPE: Record<string, string> = {
     "Escape Room","VR Escape Room","Arcade","VR Gaming","Mini Golf","Glow Golf",
     "Laser Tag","Paintball","Archery","Go-Kart Racing","Axe Throwing","Shooting Range",
     "Trampoline Park","Inflatable Park","Rage Room","Claw Machine Café","Pinball Bar",
-    "Batting Cage","Neon Sign Making","Indoor Skydiving","Indoor Snowboarding","Indoor Surfing",
+    "Batting Cage","Neon Sign Making",
   ].map((k) => [k, "amusement_center"])),
   // Amusement parks
   "Amusement Park": "amusement_park", "Waterpark": "amusement_park",
@@ -165,11 +165,7 @@ const INTEREST_TYPE: Record<string, string> = {
   // New outdoor activities
   "Cycling Tour": "tourist_attraction", "E-bike Tour": "tourist_attraction",
   "Wakeboarding": "tourist_attraction", "Paddleboarding Tour": "tourist_attraction",
-  "Bungee Jumping": "tourist_attraction", "Paragliding": "tourist_attraction",
-  "Hot Air Balloon": "tourist_attraction", "Scuba Diving": "tourist_attraction",
-  "Snorkeling": "tourist_attraction", "Freediving": "tourist_attraction",
-  "Surfing": "tourist_attraction", "Kitesurfing": "tourist_attraction",
-  "Wakeskating": "tourist_attraction", "Longboarding Tour": "tourist_attraction",
+  // Niche outdoor sports: no type restriction so text query finds the right operator
   "BMX Park": "park", "Skateboarding": "park",
   // New cultural
   "Graffiti Tour": "tourist_attraction", "Lantern Festival": "tourist_attraction",
