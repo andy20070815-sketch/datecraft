@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { addToSchedule } from "../lib/schedule";
+import { useLanguage } from "../lib/i18n";
 
 const NEIGHBOURHOODS = ["All Taipei", "Da-an", "Xinyi", "Zhongshan", "Shilin", "Beitou", "Songshan", "Wanhua", "Neihu", "Tamsui"];
 const BUDGETS = ["$ Budget (NT$0-300)", "$$ Medium (NT$300-800)", "$$$ Upscale (NT$800-2000)", "$$$$ Luxury (NT$2000+)"];
@@ -233,7 +234,10 @@ interface Venue {
   tip?: string;
 }
 
+const CATEGORY_KEYS = ["catFood","catArts","catCreative","catEntertainment","catActive","catChill"] as const;
+
 export default function IdeasPage() {
+  const { t } = useLanguage();
   const [neighbourhood, setNeighbourhood] = useState("All Taipei");
   const [budget, setBudget] = useState("$$ Medium (NT$300-800)");
   const [vibe, setVibe] = useState("Casual");
@@ -308,18 +312,18 @@ export default function IdeasPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
       <div className="text-sm text-[#be3a4a] font-medium mb-1">📍 Taipei City, Taiwan</div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-1">Date Idea Generator</h1>
-      <p className="text-gray-500 mb-8">Real Taipei venues, tuned to your vibe — photos & reservation links powered by AI.</p>
+      <h1 className="text-3xl font-bold text-gray-900 mb-1">{t.pageTitle}</h1>
+      <p className="text-gray-500 mb-8">{t.pageSubtitle}</p>
 
       {/* Filter card */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
         <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-4">
-          ⚙ Filters
+          ⚙ {t.filters}
         </div>
 
         {/* Neighbourhood */}
         <div className="mb-5">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Neighbourhood</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t.neighbourhood}</label>
           <div className="flex flex-wrap gap-2">
             {NEIGHBOURHOODS.map((n) => (
               <button
@@ -340,7 +344,7 @@ export default function IdeasPage() {
         {/* Budget / Vibe / Time */}
         <div className="grid grid-cols-3 gap-4 mb-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Budget</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t.budget}</label>
             <select
               value={budget}
               onChange={(e) => setBudget(e.target.value)}
@@ -350,7 +354,7 @@ export default function IdeasPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Vibe</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t.vibe}</label>
             <select
               value={vibe}
               onChange={(e) => setVibe(e.target.value)}
@@ -360,7 +364,7 @@ export default function IdeasPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Time of Day</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t.timeOfDay}</label>
             <select
               value={timeOfDay}
               onChange={(e) => setTimeOfDay(e.target.value)}
@@ -377,7 +381,7 @@ export default function IdeasPage() {
             onClick={() => setShowInterests((v) => !v)}
             className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 mb-2"
           >
-            {showInterests ? "▾" : "▸"} Interests
+            {showInterests ? "▾" : "▸"} {t.interests}
             {interests.length > 0 && (
               <span className="ml-1 bg-[#be3a4a] text-white rounded-full px-1.5 py-0.5 text-xs">
                 {interests.length}
@@ -386,9 +390,11 @@ export default function IdeasPage() {
           </button>
           {showInterests && (
             <div className="space-y-4">
-              {INTEREST_CATEGORIES.map(({ label, items }) => (
+              {INTEREST_CATEGORIES.map(({ label, items }, ci) => (
                 <div key={label}>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{label}</p>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                    {t[CATEGORY_KEYS[ci]] ?? label}
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {items.map((i) => {
                       const mismatch = isItemMismatch(i);
@@ -425,11 +431,9 @@ export default function IdeasPage() {
           {loading ? (
             <>
               <span className="inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Finding spots...
+              {t.finding}
             </>
-          ) : (
-            "✦ Find Date Spots"
-          )}
+          ) : t.findSpots}
         </button>
       </div>
 
@@ -437,13 +441,13 @@ export default function IdeasPage() {
       {searched && !loading && (
         <div>
           {venues.length === 0 ? (
-            <p className="text-center text-gray-400 py-10">No venues found. Try a different neighbourhood or vibe.</p>
+            <p className="text-center text-gray-400 py-10">{t.noVenues}</p>
           ) : (
             <>
               <p className="text-sm text-gray-400 mb-4">
                 {relevantCount > 0 && interests.length > 0
-                  ? `${relevantCount} matched · ${venues.length - relevantCount} more nearby`
-                  : `${venues.length} spots found`}
+                  ? `${relevantCount} ${t.matched} · ${venues.length - relevantCount} ${t.moreNearby}`
+                  : `${venues.length} ${t.spotsFound}`}
               </p>
               <div className="flex flex-col gap-4">
                 {venues.map((v, idx) => (
@@ -452,7 +456,7 @@ export default function IdeasPage() {
                     {interests.length > 0 && idx === relevantCount && relevantCount > 0 && venues.length > relevantCount && (
                       <div className="flex items-center gap-3 my-6">
                         <div className="flex-1 h-px bg-gray-100" />
-                        <span className="text-xs text-gray-400 font-medium whitespace-nowrap">More nearby</span>
+                        <span className="text-xs text-gray-400 font-medium whitespace-nowrap">{t.moreNearby}</span>
                         <div className="flex-1 h-px bg-gray-100" />
                       </div>
                     )}
@@ -486,16 +490,16 @@ export default function IdeasPage() {
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-sm text-[#be3a4a] font-medium hover:underline"
                           >
-                            View on Maps →
+                            {t.viewOnMaps}
                           </a>
                           {addedIds.has(v.place_id) ? (
-                            <span className="text-sm text-green-600 font-medium">✓ Added</span>
+                            <span className="text-sm text-green-600 font-medium">{t.added}</span>
                           ) : (
                             <button
                               onClick={() => setSchedulingVenue(v)}
                               className="text-sm text-gray-500 font-medium hover:text-[#be3a4a] transition-colors border border-gray-200 rounded-full px-3 py-0.5 hover:border-[#be3a4a]"
                             >
-                              + Schedule
+                              {t.scheduleBtn}
                             </button>
                           )}
                         </div>
@@ -516,12 +520,12 @@ export default function IdeasPage() {
           onClick={(e) => { if (e.target === e.currentTarget) setSchedulingVenue(null); }}
         >
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">Add to Schedule</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-1">{t.addToSchedule}</h2>
             <p className="text-sm text-gray-500 mb-5">{schedulingVenue.name}</p>
             <form onSubmit={handleAddToSchedule} className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">Date *</label>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">{t.dateLabel} *</label>
                   <input
                     required
                     type="date"
@@ -531,7 +535,7 @@ export default function IdeasPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">Time</label>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">{t.timeLabel}</label>
                   <input
                     type="time"
                     value={schedTime}
@@ -541,11 +545,11 @@ export default function IdeasPage() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">Notes</label>
+                <label className="text-sm font-medium text-gray-700 block mb-1">{t.notesLabel}</label>
                 <textarea
                   value={schedNotes}
                   onChange={(e) => setSchedNotes(e.target.value)}
-                  placeholder="Any reminders or ideas..."
+                  placeholder={t.notesPlaceholder}
                   rows={2}
                   className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#be3a4a] resize-none"
                 />
@@ -556,13 +560,13 @@ export default function IdeasPage() {
                   onClick={() => setSchedulingVenue(null)}
                   className="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:border-gray-400 transition-colors"
                 >
-                  Cancel
+                  {t.cancel}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 bg-[#be3a4a] text-white py-2.5 rounded-xl text-sm font-medium hover:bg-[#a3303f] transition-colors"
                 >
-                  Add to Schedule
+                  {t.addToSchedule}
                 </button>
               </div>
             </form>
