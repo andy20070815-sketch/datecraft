@@ -234,7 +234,9 @@ export const ZH_BUDGETS: Record<string, string> = {
 };
 
 export const ZH_NEIGHBOURHOODS: Record<string, string> = {
-  "All Taipei": "全台北",
+  "All Taipei": "全台北", "Da-an": "大安", "Xinyi": "信義",
+  "Zhongshan": "中山", "Shilin": "士林", "Beitou": "北投",
+  "Songshan": "松山", "Wanhua": "萬華", "Neihu": "內湖", "Tamsui": "淡水",
 };
 
 export const T = {
