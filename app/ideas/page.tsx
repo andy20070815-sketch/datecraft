@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { addToSchedule } from "../lib/schedule";
 import { useLanguage, ZH_TAGS, ZH_VIBES, ZH_TIMES, ZH_BUDGETS, ZH_NEIGHBOURHOODS } from "../lib/i18n";
+import { useAuth } from "../lib/auth";
 
 const NEIGHBOURHOODS = ["All Taipei", "Da-an", "Xinyi", "Zhongshan", "Shilin", "Beitou", "Songshan", "Wanhua", "Neihu", "Tamsui"];
 const BUDGETS = ["$ Budget (NT$0-300)", "$$ Medium (NT$300-800)", "$$$ Upscale (NT$800-2000)", "$$$$ Luxury (NT$2000+)"];
@@ -238,6 +239,7 @@ const CATEGORY_KEYS = ["catFood","catArts","catCreative","catEntertainment","cat
 
 export default function IdeasPage() {
   const { t, lang } = useLanguage();
+  const { user, signIn } = useAuth();
   const [neighbourhood, setNeighbourhood] = useState("All Taipei");
   const [budget, setBudget] = useState("$$ Medium (NT$300-800)");
   const [vibe, setVibe] = useState("Casual");
@@ -264,10 +266,10 @@ export default function IdeasPage() {
     return false;
   }
 
-  function handleAddToSchedule(e: React.FormEvent) {
+  async function handleAddToSchedule(e: React.FormEvent) {
     e.preventDefault();
-    if (!schedulingVenue) return;
-    addToSchedule({
+    if (!schedulingVenue || !user) return;
+    await addToSchedule(user, {
       title: schedulingVenue.name,
       venueName: schedulingVenue.name,
       address: schedulingVenue.address,
@@ -496,10 +498,10 @@ export default function IdeasPage() {
                             <span className="text-sm text-green-600 font-medium">{t.added}</span>
                           ) : (
                             <button
-                              onClick={() => setSchedulingVenue(v)}
+                              onClick={() => user ? setSchedulingVenue(v) : signIn()}
                               className="text-sm text-gray-500 font-medium hover:text-[#be3a4a] transition-colors border border-gray-200 rounded-full px-3 py-0.5 hover:border-[#be3a4a]"
                             >
-                              {t.scheduleBtn}
+                              {user ? t.scheduleBtn : t.signIn}
                             </button>
                           )}
                         </div>

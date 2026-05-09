@@ -1,42 +1,52 @@
+import {
+  collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot,
+} from "firebase/firestore";
+import type { User } from "firebase/auth";
+import { db } from "./firebase";
+
 export interface ScheduledDate {
   id: string;
   title: string;
   venueName: string;
   address: string;
   mapsLink: string;
-  date: string;   // "2026-05-20"
-  time: string;   // "19:00"
+  date: string;
+  time: string;
   notes: string;
   status: "planned" | "confirmed" | "completed";
 }
 
-const KEY = "datecraft_schedule";
-
-export function getSchedule(): ScheduledDate[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]");
-  } catch {
-    return [];
-  }
+function datesRef(userId: string) {
+  return collection(db, "schedules", userId, "dates");
 }
 
-export function saveSchedule(dates: ScheduledDate[]): void {
-  localStorage.setItem(KEY, JSON.stringify(dates));
+export function subscribeToSchedule(
+  user: User,
+  callback: (dates: ScheduledDate[]) => void,
+): () => void {
+  return onSnapshot(datesRef(user.uid), (snap) => {
+    const dates = snap.docs
+      .map((d) => ({ id: d.id, ...d.data() } as ScheduledDate))
+      .sort((a, b) => (a.date < b.date ? -1 : 1));
+    callback(dates);
+  });
 }
 
-export function addToSchedule(entry: Omit<ScheduledDate, "id" | "status">): ScheduledDate {
-  const dates = getSchedule();
-  const newDate: ScheduledDate = { ...entry, id: crypto.randomUUID(), status: "planned" };
-  dates.push(newDate);
-  saveSchedule(dates);
-  return newDate;
+export async function addToSchedule(
+  user: User,
+  entry: Omit<ScheduledDate, "id" | "status">,
+): Promise<void> {
+  await addDoc(datesRef(user.uid), { ...entry, status: "planned" });
 }
 
-export function removeFromSchedule(id: string): void {
-  saveSchedule(getSchedule().filter((d) => d.id !== id));
+export async function removeFromSchedule(user: User, id: string): Promise<void> {
+  await deleteDoc(doc(db, "schedules", user.uid, "dates", id));
 }
 
-export function updateStatus(id: string, status: ScheduledDate["status"]): void {
-  saveSchedule(getSchedule().map((d) => (d.id === id ? { ...d, status } : d)));
+export async function updateStatus(
+  user: User,
+  id: string,
+  status: ScheduledDate["status"],
+): Promise<void> {
+  await updateDoc(doc(db, "schedules", user.uid, "dates", id), { status });
 }

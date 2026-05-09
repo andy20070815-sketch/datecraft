@@ -243,6 +243,8 @@ export const T = {
   en: {
     // Nav
     schedule: "Schedule", newDate: "+ New Date", ideas: "✦ Ideas",
+    signIn: "Sign in with Google", signOut: "Sign out",
+    signInPrompt: "Sign in to save and sync your schedule across devices.",
     // Ideas
     pageTitle: "Date Idea Generator",
     pageSubtitle: "Real Taipei venues, tuned to your vibe — photos & maps links.",
@@ -278,6 +280,8 @@ export const T = {
   zh: {
     // Nav
     schedule: "行程", newDate: "+ 新增約會", ideas: "✦ 點子",
+    signIn: "使用 Google 登入", signOut: "登出",
+    signInPrompt: "登入以跨裝置同步你的約會行程。",
     // Ideas
     pageTitle: "約會點子產生器",
     pageSubtitle: "台北真實場所，根據你的氛圍篩選 — 附照片與地圖連結。",
