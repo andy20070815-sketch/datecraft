@@ -242,7 +242,7 @@ export const ZH_NEIGHBOURHOODS: Record<string, string> = {
 export const T = {
   en: {
     // Nav
-    schedule: "Schedule", newDate: "+ New Date", ideas: "✦ Ideas",
+    schedule: "Schedule", newDate: "+ New Date", ideas: "✦ Ideas", askAi: "✦ Ask AI",
     signIn: "Sign in with Google", signOut: "Sign out",
     signInPrompt: "Sign in to save and sync your schedule across devices.",
     // Ideas
@@ -287,7 +287,7 @@ export const T = {
   },
   zh: {
     // Nav
-    schedule: "行程", newDate: "+ 新增約會", ideas: "✦ 點子",
+    schedule: "行程", newDate: "+ 新增約會", ideas: "✦ 點子", askAi: "✦ AI 推薦",
     signIn: "使用 Google 登入", signOut: "登出",
     signInPrompt: "登入以跨裝置同步你的約會行程。",
     // Ideas
