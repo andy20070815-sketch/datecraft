@@ -400,13 +400,14 @@ async function searchText(
   lat: number,
   lng: number,
   priceLevels: string[],
-  includedType?: string
+  includedType?: string,
+  radius = 12000,
 ): Promise<NewPlace[]> {
   const applyPriceLevels = priceLevels.length > 0 && (!includedType || PRICE_LEVEL_TYPES.has(includedType));
   const body: Record<string, unknown> = {
     textQuery: query,
     maxResultCount: 20,
-    locationBias: { circle: { center: { latitude: lat, longitude: lng }, radius: 4000 } },
+    locationBias: { circle: { center: { latitude: lat, longitude: lng }, radius } },
   };
   if (applyPriceLevels) body.priceLevels = priceLevels;
   if (includedType) body.includedType = includedType;
@@ -451,9 +452,12 @@ export async function POST(req: NextRequest) {
   }
 
   if (interestList.length > 0) {
-    // Interest mode: fire one query per interest, only keep venues that matched
-    const interestQueries = interestList.slice(0, 15).map((i) => ({
-      query: `${SEARCH_QUERY[i] ?? i} ${loc}`,   // use specific override query when available
+    const capped = interestList.slice(0, 15);
+
+    // Pass 1: specific query per interest
+    const interestQueries = capped.map((i) => ({
+      interest: i,
+      query: `${SEARCH_QUERY[i] ?? i} ${loc}`,
       type:  INTEREST_TYPE[i],
     }));
     const sets = await Promise.all(
@@ -462,7 +466,18 @@ export async function POST(req: NextRequest) {
       )
     );
     sets.forEach((set) => set.forEach((p) => ingest(p, 1)));
-    // No context queries, no fallback — only show what actually matched
+
+    // Pass 2: retry any interest that returned 0 results with a simpler query,
+    // no type restriction, and wider radius so niche/sparse venues can still be found
+    const emptyInterests = capped.filter((_, idx) => sets[idx].length === 0);
+    if (emptyInterests.length > 0) {
+      const retries = await Promise.all(
+        emptyInterests.map((i) =>
+          searchText(`${i} Taipei Taiwan`, coords.lat, coords.lng, [], undefined, 25000)
+        )
+      );
+      retries.forEach((set) => set.forEach((p) => ingest(p, 1)));
+    }
   } else {
     // Vibe mode: broad context queries + fallback filler
     const contextQueries = [
