@@ -1,11 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   subscribeToSchedule, addToSchedule, removeFromSchedule, updateStatus,
   type ScheduledDate,
 } from "../lib/schedule";
+import {
+  subscribeToCouple, generateInviteCode, joinWithCode, unlinkCouple,
+  type CoupleInfo,
+} from "../lib/couple";
 import { useLanguage } from "../lib/i18n";
 import { useAuth } from "../lib/auth";
 
@@ -16,7 +21,6 @@ const STATUS_COLORS: Record<ScheduledDate["status"], string> = {
   confirmed: "bg-rose-100 text-[#be3a4a]",
   completed: "bg-gray-100 text-gray-500",
 };
-
 const STATUS_NEXT: Record<ScheduledDate["status"], ScheduledDate["status"]> = {
   planned: "confirmed", confirmed: "completed", completed: "planned",
 };
@@ -26,13 +30,11 @@ function formatDate(iso: string) {
   const d = new Date(iso + "T00:00:00");
   return { month: d.toLocaleString("en", { month: "short" }).toUpperCase(), day: d.getDate() };
 }
-
 function formatTime(t: string) {
   if (!t) return "";
   const [h, m] = t.split(":").map(Number);
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
 }
-
 function buildGCalUrl(d: ScheduledDate): string {
   const title = encodeURIComponent(d.title);
   const location = encodeURIComponent(d.address || d.venueName || "");
@@ -43,9 +45,7 @@ function buildGCalUrl(d: ScheduledDate): string {
     if (d.time) {
       const [h, m] = d.time.split(":").map(Number);
       const pad = (n: number) => String(n).padStart(2, "0");
-      const start = `${base}T${pad(h)}${pad(m)}00`;
-      const end   = `${base}T${pad(h + 1)}${pad(m)}00`;
-      dates = `${start}/${end}`;
+      dates = `${base}T${pad(h)}${pad(m)}00/${base}T${pad(h + 1)}${pad(m)}00`;
     } else {
       const next = new Date(d.date + "T00:00:00");
       next.setDate(next.getDate() + 1);
@@ -64,22 +64,42 @@ const EMPTY: FormState = { title: "", venueName: "", address: "", mapsLink: "", 
 export default function SchedulePage() {
   const { t, lang } = useLanguage();
   const { user, loading: authLoading, signIn } = useAuth();
+
   const [dates, setDates]         = useState<ScheduledDate[]>([]);
+  const [couple, setCouple]       = useState<CoupleInfo | null>(null);
   const [filter, setFilter]       = useState<Filter>("all");
   const [showModal, setShowModal] = useState(false);
   const [form, setForm]           = useState<FormState>(EMPTY);
   const [cancelId, setCancelId]   = useState<string | null>(null);
   const [shareMsg, setShareMsg]   = useState("");
 
+  // Couple panel state
+  const [inviteCode, setInviteCode]   = useState("");
+  const [codeInput, setCodeInput]     = useState("");
+  const [codeError, setCodeError]     = useState("");
+  const [codeCopied, setCodeCopied]   = useState(false);
+  const [unlinkConfirm, setUnlinkConfirm] = useState(false);
+  const [joining, setJoining]         = useState(false);
+
+  // Subscribe to couple status
   useEffect(() => {
-    if (!user) { setDates([]); return; }
-    const unsub = subscribeToSchedule(user, setDates);
+    if (!user) return;
+    const unsub = subscribeToCouple(user, setCouple);
     return unsub;
   }, [user]);
 
+  // Subscribe to schedule (switches between solo and couple collection)
+  useEffect(() => {
+    if (!user) { setDates([]); return; }
+    const unsub = subscribeToSchedule(user, couple?.id ?? null, setDates);
+    return unsub;
+  }, [user, couple?.id]);
+
+  // Reset invite code when couple status changes
+  useEffect(() => { if (couple) setInviteCode(""); }, [couple]);
+
   const filtered = filter === "all" ? dates : dates.filter((d) => d.status === filter);
   const upcoming = dates.filter((d) => d.status !== "completed").length;
-
   const statusLabel: Record<ScheduledDate["status"], string> = {
     planned: t.planned, confirmed: t.confirmed, completed: t.completed,
   };
@@ -87,23 +107,47 @@ export default function SchedulePage() {
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
-    await addToSchedule(user, form);
+    await addToSchedule(user, couple?.id ?? null, form);
     setForm(EMPTY);
     setShowModal(false);
   }
-
   async function handleCancel(id: string) {
     if (!user) return;
-    await removeFromSchedule(user, id);
+    await removeFromSchedule(user, couple?.id ?? null, id);
     setCancelId(null);
   }
-
   async function handleStatusCycle(id: string, current: ScheduledDate["status"]) {
     if (!user) return;
-    await updateStatus(user, id, STATUS_NEXT[current]);
+    await updateStatus(user, couple?.id ?? null, id, STATUS_NEXT[current]);
   }
 
-  function handleExportPdf() { window.print(); }
+  async function handleGenerateCode() {
+    if (!user) return;
+    const code = await generateInviteCode(user);
+    setInviteCode(code);
+  }
+  async function handleCopyCode() {
+    await navigator.clipboard.writeText(inviteCode);
+    setCodeCopied(true);
+    setTimeout(() => setCodeCopied(false), 2000);
+  }
+  async function handleJoin() {
+    if (!user || !codeInput.trim()) return;
+    setJoining(true);
+    setCodeError("");
+    const result = await joinWithCode(user, codeInput);
+    setJoining(false);
+    if (result === "ok") { setCodeInput(""); }
+    else if (result === "not_found") setCodeError(t.codeNotFound);
+    else if (result === "self") setCodeError(t.codeSelf);
+    else setCodeError(t.codeError);
+  }
+  async function handleUnlink() {
+    if (!user || !couple) return;
+    await unlinkCouple(user, couple);
+    setUnlinkConfirm(false);
+    setCouple(null);
+  }
 
   function handleShare() {
     if (dates.length === 0) return;
@@ -120,7 +164,6 @@ export default function SchedulePage() {
     });
   }
 
-  // Auth loading
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -129,17 +172,13 @@ export default function SchedulePage() {
     );
   }
 
-  // Not signed in
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
         <div className="text-4xl mb-4">♥</div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">{t.yourSchedule}</h2>
         <p className="text-gray-500 mb-6 max-w-xs">{t.signInPrompt}</p>
-        <button
-          onClick={signIn}
-          className="bg-[#be3a4a] text-white px-6 py-3 rounded-full font-medium hover:bg-[#a3303f] transition-colors flex items-center gap-2"
-        >
+        <button onClick={signIn} className="bg-[#be3a4a] text-white px-6 py-3 rounded-full font-medium hover:bg-[#a3303f] transition-colors flex items-center gap-2">
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -152,8 +191,101 @@ export default function SchedulePage() {
     );
   }
 
+  const partnerUid = couple?.members.find((m) => m !== user.uid);
+  const partnerInfo = partnerUid ? couple?.memberInfo[partnerUid] : null;
+
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
+
+      {/* Couple sync panel */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-8 no-print">
+        {couple && partnerInfo ? (
+          /* Linked state */
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex -space-x-2">
+                {user.photoURL && (
+                  <Image src={user.photoURL} alt="" width={32} height={32} className="rounded-full ring-2 ring-white" />
+                )}
+                {partnerInfo.photoURL && (
+                  <Image src={partnerInfo.photoURL} alt="" width={32} height={32} className="rounded-full ring-2 ring-white" />
+                )}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">
+                  {t.linkedWith} {partnerInfo.displayName}
+                </p>
+                <p className="text-xs text-gray-400">♥ {lang === "zh" ? "行程共享中" : "Shared schedule"}</p>
+              </div>
+            </div>
+            {unlinkConfirm ? (
+              <span className="flex items-center gap-2 text-sm">
+                <span className="text-gray-500">{t.unlinkConfirm}</span>
+                <button onClick={handleUnlink} className="text-red-500 font-medium hover:underline">{t.yesRemove}</button>
+                <button onClick={() => setUnlinkConfirm(false)} className="text-gray-400 hover:underline">{t.keep}</button>
+              </span>
+            ) : (
+              <button onClick={() => setUnlinkConfirm(true)} className="text-sm text-gray-400 hover:text-red-400 transition-colors">
+                {t.unlink}
+              </button>
+            )}
+          </div>
+        ) : (
+          /* Unlinked state */
+          <div>
+            <p className="text-sm font-semibold text-gray-900 mb-4">♥ {t.linkPartner}</p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Generate code side */}
+              <div className="flex-1">
+                <p className="text-xs text-gray-500 mb-2">{t.generateCode}</p>
+                {inviteCode ? (
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xl font-bold tracking-widest text-[#be3a4a] bg-rose-50 px-4 py-2 rounded-xl">
+                      {inviteCode}
+                    </span>
+                    <button onClick={handleCopyCode} className="text-sm text-gray-500 hover:text-gray-900 border border-gray-200 px-3 py-2 rounded-lg transition-colors">
+                      {codeCopied ? t.codeCopied : t.copyCode}
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={handleGenerateCode} className="border border-[#be3a4a] text-[#be3a4a] px-4 py-2 rounded-xl text-sm font-medium hover:bg-rose-50 transition-colors">
+                    {t.generateCode}
+                  </button>
+                )}
+              </div>
+              {/* Divider */}
+              <div className="flex sm:flex-col items-center gap-2">
+                <div className="flex-1 h-px sm:h-full sm:w-px bg-gray-100" />
+                <span className="text-xs text-gray-400 shrink-0">{lang === "zh" ? "或" : "or"}</span>
+                <div className="flex-1 h-px sm:h-full sm:w-px bg-gray-100" />
+              </div>
+              {/* Enter code side */}
+              <div className="flex-1">
+                <p className="text-xs text-gray-500 mb-2">{t.enterCode}</p>
+                <div className="flex gap-2">
+                  <input
+                    value={codeInput}
+                    onChange={(e) => { setCodeInput(e.target.value.toUpperCase()); setCodeError(""); }}
+                    onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+                    placeholder="ABC123"
+                    maxLength={6}
+                    className="font-mono w-28 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#be3a4a] uppercase tracking-widest"
+                  />
+                  <button
+                    onClick={handleJoin}
+                    disabled={joining || codeInput.length < 6}
+                    className="bg-[#be3a4a] text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-[#a3303f] transition-colors disabled:opacity-50"
+                  >
+                    {joining ? "..." : t.joinCouple}
+                  </button>
+                </div>
+                {codeError && <p className="text-xs text-red-500 mt-1">{codeError}</p>}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
         <div>
@@ -177,7 +309,7 @@ export default function SchedulePage() {
                   </span>
                 )}
               </button>
-              <button onClick={handleExportPdf} className="border border-gray-200 text-gray-600 px-4 py-2.5 rounded-full font-medium text-sm hover:border-gray-400 transition-colors">
+              <button onClick={() => window.print()} className="border border-gray-200 text-gray-600 px-4 py-2.5 rounded-full font-medium text-sm hover:border-gray-400 transition-colors">
                 {t.exportPdf}
               </button>
             </>

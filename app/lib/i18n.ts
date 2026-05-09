@@ -266,6 +266,14 @@ export const T = {
     yesRemove: "Yes, remove", keep: "Keep",
     upcoming: "upcoming",
     addToGCal: "Add to Google Calendar",
+    // Couple sync
+    linkPartner: "Link with Partner", generateCode: "Generate invite code",
+    yourCode: "Your code", copyCode: "Copy", codeCopied: "Copied!",
+    enterCode: "Enter partner's code", joinCouple: "Link up",
+    linkedWith: "Syncing with", unlink: "Unlink",
+    unlinkConfirm: "Stop sharing this schedule?",
+    codeNotFound: "Code not found — double-check it.", codeSelf: "That's your own code!",
+    codeError: "Something went wrong. Try again.",
     exportPdf: "Export PDF", share: "Share",
     shareSuccess: "Copied to clipboard!",
     // Modals
@@ -303,6 +311,14 @@ export const T = {
     yesRemove: "確定移除", keep: "保留",
     upcoming: "個即將到來",
     addToGCal: "加入 Google 日曆",
+    // Couple sync
+    linkPartner: "與伴侶連結", generateCode: "產生邀請碼",
+    yourCode: "你的邀請碼", copyCode: "複製", codeCopied: "已複製！",
+    enterCode: "輸入伴侶邀請碼", joinCouple: "連結",
+    linkedWith: "同步中", unlink: "解除連結",
+    unlinkConfirm: "停止共享此行程？",
+    codeNotFound: "找不到邀請碼，請再確認。", codeSelf: "不能輸入自己的邀請碼！",
+    codeError: "發生錯誤，請重試。",
     exportPdf: "匯出 PDF", share: "分享",
     shareSuccess: "已複製到剪貼簿！",
     // Modals

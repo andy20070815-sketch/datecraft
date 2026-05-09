@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { addToSchedule } from "../lib/schedule";
+import { subscribeToCouple, type CoupleInfo } from "../lib/couple";
 import { useLanguage, ZH_TAGS, ZH_VIBES, ZH_TIMES, ZH_BUDGETS, ZH_NEIGHBOURHOODS } from "../lib/i18n";
 import { useAuth } from "../lib/auth";
 
@@ -240,6 +241,13 @@ const CATEGORY_KEYS = ["catFood","catArts","catCreative","catEntertainment","cat
 export default function IdeasPage() {
   const { t, lang } = useLanguage();
   const { user, signIn } = useAuth();
+  const [couple, setCouple] = useState<CoupleInfo | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    const unsub = subscribeToCouple(user, setCouple);
+    return unsub;
+  }, [user]);
   const [neighbourhood, setNeighbourhood] = useState("All Taipei");
   const [budget, setBudget] = useState("$$ Medium (NT$300-800)");
   const [vibe, setVibe] = useState("Casual");
@@ -269,7 +277,7 @@ export default function IdeasPage() {
   async function handleAddToSchedule(e: React.FormEvent) {
     e.preventDefault();
     if (!schedulingVenue || !user) return;
-    await addToSchedule(user, {
+    await addToSchedule(user, couple?.id ?? null, {
       title: schedulingVenue.name,
       venueName: schedulingVenue.name,
       address: schedulingVenue.address,
