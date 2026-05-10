@@ -30,7 +30,7 @@ export default function NavBar() {
       <header className="bg-white border-b border-gray-100 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-30">
         <Link href="/schedule" className="flex items-center gap-2 font-bold text-lg text-gray-900">
           <span className="text-[#be3a4a]">♥</span>
-          <span className="hidden xs:inline">DateCraft</span>
+          <span>DateCraft</span>
         </Link>
 
         {/* Desktop nav */}
