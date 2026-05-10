@@ -387,75 +387,86 @@ export default function IdeasPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 sm:px-6 sm:py-10">
-      <div className="text-sm text-[#be3a4a] font-medium mb-1">📍 Taipei City, Taiwan</div>
-      <h1 className="font-serif text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{t.pageTitle}</h1>
-      <p className="text-gray-500 mb-6 sm:mb-8 text-sm sm:text-base">{t.pageSubtitle}</p>
+    <div>
+      {/* Hero — full-bleed gradient */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#0d0408] via-[#2a0e1c] to-[#7a1f30] px-4 py-14 sm:py-20">
+        <div className="absolute -top-24 -right-24 w-[480px] h-[480px] bg-purple-600/25 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-80 h-80 bg-rose-400/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/3 right-1/3 w-56 h-56 bg-orange-400/15 rounded-full blur-3xl pointer-events-none" />
 
-      {/* AI search bar */}
-      {(() => {
-        const prompts = lang === "zh"
-          ? ["浪漫晚餐約會", "第一次見面", "美食探索之旅", "戶外冒險約會", "文藝下午茶", "放鬆咖啡廳約會"]
-          : ["Romantic dinner date", "Fun first date", "Foodie adventure", "Outdoor active date", "Artsy cultural day", "Chill café hopping"];
-        return (
-          <div className="mb-6">
-            {/* Input bar */}
-            <div className="flex gap-2">
-              <input
-                value={aiQuery}
-                onChange={(e) => setAiQuery(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { setConv(null); handleAiSearch(); } }}
-                placeholder={lang === "zh" ? "✦ 描述你理想的約會..." : "✦ Describe your ideal date..."}
-                className="flex-1 bg-white border border-gray-200 rounded-full px-5 py-3 text-sm focus:outline-none focus:border-[#be3a4a] shadow-sm"
-                disabled={aiLoading}
-              />
-              <button
-                onClick={() => { setConv(null); handleAiSearch(); }}
-                disabled={!aiQuery.trim() || aiLoading}
-                className="bg-[#be3a4a] text-white px-5 py-3 rounded-full text-sm font-medium hover:bg-[#a3303f] transition-colors disabled:opacity-40 flex items-center"
-              >
-                {aiLoading
-                  ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
-                  : "✦"}
-              </button>
-            </div>
-
-            {/* Follow-up question with clickable options */}
-            {conv && (
-              <div className="mt-3 bg-white border border-gray-100 rounded-2xl shadow-sm p-4">
-                <p className="text-sm font-medium text-gray-800 mb-3">{conv.question}</p>
-                <div className="flex flex-wrap gap-2">
-                  {conv.options.map((opt) => (
-                    <button
-                      key={opt}
-                      onClick={() => handleOptionClick(opt)}
-                      disabled={aiLoading}
-                      className="px-4 py-1.5 rounded-full text-sm font-medium bg-gray-50 border border-gray-200 text-gray-700 hover:border-[#be3a4a] hover:text-[#be3a4a] hover:bg-rose-50 transition-colors disabled:opacity-40"
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Quick prompt chips — only show when no active conversation */}
-            {!conv && !aiLoading && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {prompts.map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => { setAiQuery(p); handleAiSearch(p); }}
-                    className="px-3 py-1.5 rounded-full text-xs font-medium bg-white border border-gray-200 text-gray-600 hover:border-[#be3a4a] hover:text-[#be3a4a] transition-colors shadow-sm"
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-            )}
+        <div className="max-w-3xl mx-auto relative z-10">
+          <div className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm text-white/70 mb-5">
+            📍 Taipei City, Taiwan
           </div>
-        );
-      })()}
+          <h1 className="font-serif text-4xl sm:text-5xl font-bold text-white mb-3 leading-tight">{t.pageTitle}</h1>
+          <p className="text-white/60 mb-8 text-sm sm:text-base max-w-lg">{t.pageSubtitle}</p>
+
+          {/* AI search bar */}
+          {(() => {
+            const prompts = lang === "zh"
+              ? ["浪漫晚餐約會", "第一次見面", "美食探索之旅", "戶外冒險約會", "文藝下午茶", "放鬆咖啡廳約會"]
+              : ["Romantic dinner date", "Fun first date", "Foodie adventure", "Outdoor active date", "Artsy cultural day", "Chill café hopping"];
+            return (
+              <div>
+                <div className="flex gap-2">
+                  <input
+                    value={aiQuery}
+                    onChange={(e) => setAiQuery(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") { setConv(null); handleAiSearch(); } }}
+                    placeholder={lang === "zh" ? "✦ 描述你理想的約會..." : "✦ Describe your ideal date..."}
+                    className="flex-1 bg-white/95 rounded-full px-5 py-3.5 text-sm focus:outline-none shadow-lg placeholder-gray-400"
+                    disabled={aiLoading}
+                  />
+                  <button
+                    onClick={() => { setConv(null); handleAiSearch(); }}
+                    disabled={!aiQuery.trim() || aiLoading}
+                    className="bg-[#be3a4a] text-white px-5 py-3.5 rounded-full text-sm font-medium hover:bg-[#a3303f] transition-colors disabled:opacity-40 flex items-center shadow-lg"
+                  >
+                    {aiLoading
+                      ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
+                      : "✦"}
+                  </button>
+                </div>
+
+                {conv && (
+                  <div className="mt-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4">
+                    <p className="text-sm font-medium text-white mb-3">{conv.question}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {conv.options.map((opt) => (
+                        <button
+                          key={opt}
+                          onClick={() => handleOptionClick(opt)}
+                          disabled={aiLoading}
+                          className="px-4 py-1.5 rounded-full text-sm font-medium bg-white/10 border border-white/30 text-white hover:bg-white/20 transition-colors disabled:opacity-40"
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {!conv && !aiLoading && (
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {prompts.map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => { setAiQuery(p); handleAiSearch(p); }}
+                        className="px-3 py-1.5 rounded-full text-xs font-medium bg-white/10 border border-white/20 text-white/80 hover:bg-white/20 transition-colors"
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+
+      {/* Content below hero */}
+      <div className="max-w-3xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
 
       {/* Filter card */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 mb-6 sm:mb-8">
@@ -602,7 +613,7 @@ export default function IdeasPage() {
                         <div className="flex-1 h-px bg-gray-100" />
                       </div>
                     )}
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col sm:flex-row">
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col sm:flex-row">
                       {v.photo && (
                         <img
                           src={v.photo}
@@ -715,6 +726,7 @@ export default function IdeasPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
