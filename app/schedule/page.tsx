@@ -289,7 +289,7 @@ export default function SchedulePage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-display text-2xl sm:text-4xl font-bold text-gray-900 mb-1">{t.yourSchedule}</h1>
+          <h1 className="font-serif text-2xl sm:text-4xl font-bold text-gray-900 mb-1">{t.yourSchedule}</h1>
           <p className="text-gray-500">
             {upcoming > 0 ? `${upcoming} ${t.upcoming} · ` : ""}
             {dates.length === 0 ? t.noSchedule : `${dates.length} ${lang === "zh" ? "共" : "total"}`}

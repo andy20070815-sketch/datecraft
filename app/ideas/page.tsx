@@ -389,7 +389,7 @@ export default function IdeasPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 sm:px-6 sm:py-10">
       <div className="text-sm text-[#be3a4a] font-medium mb-1">📍 Taipei City, Taiwan</div>
-      <h1 className="font-display text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{t.pageTitle}</h1>
+      <h1 className="font-serif text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{t.pageTitle}</h1>
       <p className="text-gray-500 mb-6 sm:mb-8 text-sm sm:text-base">{t.pageSubtitle}</p>
 
       {/* AI search bar */}
