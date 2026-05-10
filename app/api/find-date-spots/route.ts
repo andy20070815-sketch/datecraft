@@ -418,6 +418,7 @@ interface NewPlace {
   priceLevel?: string;
   photos?: { name: string }[];
   googleMapsUri?: string;
+  websiteUri?: string;
 }
 
 // Only restaurants, bars, and cafes reliably have price level data in Google Places
@@ -447,7 +448,7 @@ async function searchText(
         "Content-Type": "application/json",
         "X-Goog-Api-Key": process.env.GOOGLE_PLACES_API_KEY!,
         "X-Goog-FieldMask":
-          "places.id,places.displayName,places.formattedAddress,places.rating,places.priceLevel,places.photos,places.googleMapsUri",
+          "places.id,places.displayName,places.formattedAddress,places.rating,places.priceLevel,places.photos,places.googleMapsUri,places.websiteUri",
       },
       body: JSON.stringify(body),
     });
@@ -547,6 +548,7 @@ export async function POST(req: NextRequest) {
     price_level: p.priceLevel ? PRICE_LEVEL_MAP[p.priceLevel] ?? 2 : 2,
     photo:       p.photos?.[0]?.name ? getPhotoUrl(p.photos[0].name) : null,
     maps_link:   p.googleMapsUri ?? `https://www.google.com/maps/place/?q=place_id:${p.id}`,
+    website:     p.websiteUri ?? null,
   }));
 
   return NextResponse.json({ venues, relevantCount });

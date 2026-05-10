@@ -233,6 +233,7 @@ interface Venue {
   price_level?: number;
   photo?: string;
   maps_link: string;
+  website?: string | null;
   tip?: string;
 }
 
@@ -636,7 +637,7 @@ export default function IdeasPage() {
                             {v.tip}
                           </p>
                         )}
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3 flex-wrap">
                           <a
                             href={v.maps_link}
                             target="_blank"
@@ -645,6 +646,16 @@ export default function IdeasPage() {
                           >
                             {t.viewOnMaps}
                           </a>
+                          {v.website && (
+                            <a
+                              href={v.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-gray-500 font-medium hover:text-[#be3a4a] transition-colors border border-gray-200 rounded-full px-3 py-0.5 hover:border-[#be3a4a]"
+                            >
+                              {lang === "zh" ? "🔗 訂位 / 官網" : "🔗 Reserve / Website"}
+                            </a>
+                          )}
                           {addedIds.has(v.place_id) ? (
                             <span className="text-sm text-green-600 font-medium">{t.added}</span>
                           ) : (
