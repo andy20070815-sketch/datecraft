@@ -10,6 +10,12 @@ body {
   color: #1a1a1a;
 }
 
+/* Cormorant Garamond reads best slightly larger with tracking */
+.font-serif {
+  letter-spacing: -0.01em;
+  font-weight: 500;
+}
+
 @media print {
   header, .no-print { display: none !important; }
   body { background: white; }

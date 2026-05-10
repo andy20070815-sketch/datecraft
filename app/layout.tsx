@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { DM_Sans, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
 import Providers from "@/components/Providers";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
+const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-inter" });
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-playfair",
+});
 
 export const metadata: Metadata = {
   title: "DateCraft",
@@ -14,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`h-full ${inter.variable} ${playfair.variable}`}>
+    <html lang="en" className={`h-full ${dmSans.variable} ${cormorant.variable}`}>
       <body className="min-h-full flex flex-col antialiased">
         <Providers>
           <NavBar />
