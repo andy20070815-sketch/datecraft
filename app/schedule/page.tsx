@@ -16,6 +16,57 @@ import { useAuth } from "../lib/auth";
 
 type Filter = "all" | ScheduledDate["status"];
 
+const FEATURED_SPOTS = [
+  {
+    emoji: "🌅",
+    name: { en: "Elephant Mountain", zh: "象山" },
+    area: { en: "Xinyi", zh: "信義區" },
+    desc: { en: "Golden-hour hike with Taipei 101 directly in view — the city's most iconic date backdrop.", zh: "黃金時刻登山，台北101近在眼前，城市最浪漫的約會背景。" },
+    mapsLink: "https://www.google.com/maps/search/?api=1&query=Elephant+Mountain+Taipei",
+    tags: { en: ["Outdoors", "Sunset", "Free"], zh: ["戶外", "夕陽", "免費"] },
+  },
+  {
+    emoji: "♨️",
+    name: { en: "Beitou Hot Springs", zh: "北投溫泉" },
+    area: { en: "Beitou", zh: "北投區" },
+    desc: { en: "A whole neighbourhood built for relaxation — onsen soaks, Japanese-style ryokan, and a cliffside library.", zh: "整個街區都是泡湯文化，日式旅館和懸崖邊的特色圖書館。" },
+    mapsLink: "https://www.google.com/maps/search/?api=1&query=Beitou+Hot+Springs+Taipei",
+    tags: { en: ["Spa", "Relaxing", "Japanese vibe"], zh: ["溫泉", "放鬆", "日式"] },
+  },
+  {
+    emoji: "🏮",
+    name: { en: "Jiufen Old Street", zh: "九份老街" },
+    area: { en: "30 min from Taipei", zh: "距台北30分鐘" },
+    desc: { en: "Lantern-lit hillside alleyways, teahouses on cliff edges, and sweeping ocean views at dusk.", zh: "燈籠點亮山城小巷，懸崖邊的茶館，傍晚海景令人屏息。" },
+    mapsLink: "https://www.google.com/maps/search/?api=1&query=Jiufen+Old+Street+Taiwan",
+    tags: { en: ["Scenic", "Teahouse", "Day trip"], zh: ["風景", "茶館", "一日遊"] },
+  },
+  {
+    emoji: "🎨",
+    name: { en: "Huashan 1914", zh: "華山1914文創園區" },
+    area: { en: "Zhongzheng", zh: "中正區" },
+    desc: { en: "Converted wine factory turned creative park — indie shops, art shows, open-air concerts, and weekend markets.", zh: "舊酒廠改建的文創園區，有獨立小店、藝術展覽和週末市集。" },
+    mapsLink: "https://www.google.com/maps/search/?api=1&query=Huashan+1914+Creative+Park+Taipei",
+    tags: { en: ["Arts", "Cafés", "Events"], zh: ["藝術", "咖啡廳", "活動"] },
+  },
+  {
+    emoji: "🌸",
+    name: { en: "Yangmingshan", zh: "陽明山國家公園" },
+    area: { en: "Shilin / Beitou", zh: "士林 / 北投" },
+    desc: { en: "Volcanic peaks, seasonal flower fields, and natural hot springs above the city. A full-day escape.", zh: "火山山頂、季節花海和天然溫泉，城市上方的完美一日遊。" },
+    mapsLink: "https://www.google.com/maps/search/?api=1&query=Yangmingshan+National+Park+Taipei",
+    tags: { en: ["Nature", "Hot Springs", "Flowers"], zh: ["自然", "溫泉", "花季"] },
+  },
+  {
+    emoji: "🍸",
+    name: { en: "Zhongshan District", zh: "中山區" },
+    area: { en: "Zhongshan", zh: "中山區" },
+    desc: { en: "Taipei's most stylish neighbourhood — tree-lined streets, concept cafés, rooftop bars, and vintage boutiques.", zh: "台北最時尚街區：林蔭大道、個性咖啡廳、屋頂酒吧和古著店。" },
+    mapsLink: "https://www.google.com/maps/search/?api=1&query=Zhongshan+District+Taipei",
+    tags: { en: ["Cafés", "Bars", "Nightlife"], zh: ["咖啡廳", "酒吧", "夜生活"] },
+  },
+];
+
 const STATUS_COLORS: Record<ScheduledDate["status"], string> = {
   planned:   "bg-amber-100 text-amber-700",
   confirmed: "bg-rose-100 text-[#be3a4a]",
@@ -395,9 +446,49 @@ export default function SchedulePage() {
       </div>
 
       {filtered.length === 0 && (
-        <div className="text-center py-16 text-gray-400">
-          <p className="text-lg mb-2">{t.noSchedule}</p>
-          <Link href="/ideas" className="text-[#be3a4a] font-medium hover:underline">{t.findIdeas}</Link>
+        <div>
+          <div className="text-center py-10 text-gray-400">
+            <p className="text-lg mb-1">{t.noSchedule}</p>
+            <p className="text-sm mb-6">{lang === "zh" ? "先看看這些熱門地點找靈感吧" : "Get inspired by these popular spots"}</p>
+            <Link href="/ideas" className="text-[#be3a4a] font-medium hover:underline text-sm">{t.findIdeas} →</Link>
+          </div>
+
+          {/* Recommended spots */}
+          <div className="mt-4">
+            <h2 className="font-serif text-xl font-bold text-gray-900 mb-1">
+              {lang === "zh" ? "精選約會地點" : "Recommended Date Spots"}
+            </h2>
+            <p className="text-sm text-gray-400 mb-5">
+              {lang === "zh" ? "台北最受歡迎的約會去處，點擊查看地圖。" : "Taipei's most popular date spots — tap to open in Maps."}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {FEATURED_SPOTS.map((spot) => (
+                <a
+                  key={spot.name.en}
+                  href={spot.mapsLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 p-5 group block"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="text-3xl shrink-0">{spot.emoji}</div>
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-gray-900 group-hover:text-[#be3a4a] transition-colors mb-0.5">
+                        {lang === "zh" ? spot.name.zh : spot.name.en}
+                      </h3>
+                      <p className="text-xs text-[#be3a4a] font-medium mb-2">{lang === "zh" ? spot.area.zh : spot.area.en}</p>
+                      <p className="text-sm text-gray-500 mb-3">{lang === "zh" ? spot.desc.zh : spot.desc.en}</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {(lang === "zh" ? spot.tags.zh : spot.tags.en).map((tag) => (
+                          <span key={tag} className="px-2.5 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-medium">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
