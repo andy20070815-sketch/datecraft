@@ -387,10 +387,10 @@ export default function IdeasPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10">
+    <div className="max-w-3xl mx-auto px-4 py-6 sm:px-6 sm:py-10">
       <div className="text-sm text-[#be3a4a] font-medium mb-1">📍 Taipei City, Taiwan</div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-1">{t.pageTitle}</h1>
-      <p className="text-gray-500 mb-8">{t.pageSubtitle}</p>
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{t.pageTitle}</h1>
+      <p className="text-gray-500 mb-6 sm:mb-8 text-sm sm:text-base">{t.pageSubtitle}</p>
 
       {/* AI search bar */}
       {(() => {
@@ -458,7 +458,7 @@ export default function IdeasPage() {
       })()}
 
       {/* Filter card */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 mb-6 sm:mb-8">
         <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-4">
           ⚙ {t.filters}
         </div>
@@ -484,7 +484,7 @@ export default function IdeasPage() {
         </div>
 
         {/* Budget / Vibe / Time */}
-        <div className="grid grid-cols-3 gap-4 mb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t.budget}</label>
             <select
@@ -602,15 +602,15 @@ export default function IdeasPage() {
                         <div className="flex-1 h-px bg-gray-100" />
                       </div>
                     )}
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex">
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col sm:flex-row">
                       {v.photo && (
                         <img
                           src={v.photo}
                           alt={v.name}
-                          className="w-32 h-full object-cover flex-shrink-0"
+                          className="w-full h-44 sm:w-32 sm:h-auto object-cover flex-shrink-0"
                         />
                       )}
-                      <div className="p-5 flex-1">
+                      <div className="p-4 sm:p-5 flex-1">
                         <div className="flex items-start justify-between mb-1">
                           <h3 className="font-bold text-gray-900 text-lg">{v.name}</h3>
                           <div className="flex items-center gap-2 text-sm text-gray-500 ml-2 flex-shrink-0">
@@ -661,11 +661,11 @@ export default function IdeasPage() {
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4"
           onClick={(e) => { if (e.target === e.currentTarget) setSchedulingVenue(null); }}
         >
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-5 sm:p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-1">{t.addToSchedule}</h2>
             <p className="text-sm text-gray-500 mb-5">{schedulingVenue.name}</p>
             <form onSubmit={handleAddToSchedule} className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-1">{t.dateLabel} *</label>
                   <input
