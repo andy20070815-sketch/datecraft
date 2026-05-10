@@ -28,7 +28,7 @@ export default function NavBar() {
   return (
     <>
       <header className="bg-white/80 backdrop-blur-md border-b border-white/60 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-30">
-        <Link href="/schedule" className="flex items-center gap-2 font-serif font-bold text-lg text-gray-900">
+        <Link href="/schedule" className="flex items-center gap-2 font-serif font-semibold text-2xl text-gray-900">
           <span className="text-[#be3a4a]">♥</span>
           <span>DateCraft</span>
         </Link>
