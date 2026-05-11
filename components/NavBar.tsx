@@ -17,8 +17,10 @@ export default function NavBar() {
     <Link
       href={href}
       onClick={() => setMenuOpen(false)}
-      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-        pathname === href ? "bg-[#be3a4a] text-white" : "text-gray-600 hover:text-gray-900"
+      className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
+        pathname === href
+          ? "bg-gradient-to-r from-[#be3a4a] to-[#e05d45] text-white shadow-sm"
+          : "text-gray-500 hover:text-gray-900"
       }`}
     >
       {label}
@@ -27,10 +29,13 @@ export default function NavBar() {
 
   return (
     <>
-      <header className="bg-white/80 backdrop-blur-md border-b border-white/60 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-30">
-        <Link href="/schedule" className="flex items-center gap-2 font-serif font-semibold text-2xl text-gray-900">
-          <span className="text-[#be3a4a]">♥</span>
-          <span>DateCraft</span>
+      <header className="bg-white/80 backdrop-blur-md border-b border-gray-100/80 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+        {/* Logo */}
+        <Link href="/schedule" className="flex items-center gap-2">
+          <span className="text-[#be3a4a] text-xl">♥</span>
+          <span className="font-serif text-2xl tracking-tight bg-gradient-to-r from-[#be3a4a] to-[#e05d45] bg-clip-text text-transparent">
+            DateCraft
+          </span>
         </Link>
 
         {/* Desktop nav */}
@@ -39,7 +44,7 @@ export default function NavBar() {
           {navLink("/ideas", t.ideas)}
           <button
             onClick={toggle}
-            className="ml-2 px-3 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-600 hover:border-gray-400 transition-colors"
+            className="ml-2 px-3 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-500 hover:border-gray-400 transition-colors"
           >
             {lang === "en" ? "中文" : "EN"}
           </button>
@@ -55,12 +60,12 @@ export default function NavBar() {
                     </svg>
                   </div>
                 )}
-                <button onClick={signOut} className="px-3 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-600 hover:border-gray-400 transition-colors">
+                <button onClick={signOut} className="px-3 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-500 hover:border-gray-400 transition-colors">
                   {t.signOut}
                 </button>
               </div>
             ) : (
-              <button onClick={signIn} className="ml-2 px-4 py-1.5 rounded-full text-sm font-medium bg-[#be3a4a] text-white hover:bg-[#a3303f] transition-colors">
+              <button onClick={signIn} className="ml-2 px-4 py-1.5 rounded-full text-sm font-semibold bg-gradient-to-r from-[#be3a4a] to-[#e05d45] text-white hover:opacity-90 transition-opacity shadow-sm">
                 {t.signIn}
               </button>
             )
@@ -74,7 +79,7 @@ export default function NavBar() {
           )}
           <button
             onClick={() => setMenuOpen((o) => !o)}
-            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
             aria-label="Menu"
           >
             {menuOpen ? (
@@ -90,14 +95,14 @@ export default function NavBar() {
         </div>
       </header>
 
-      {/* Mobile dropdown menu */}
+      {/* Mobile dropdown */}
       {menuOpen && (
         <div className="sm:hidden fixed inset-0 top-[57px] z-20 bg-white border-t border-gray-100 flex flex-col p-6 gap-3">
           {navLink("/schedule", t.schedule)}
           {navLink("/ideas", t.ideas)}
           <button
             onClick={() => { toggle(); }}
-            className="px-4 py-2 rounded-full text-sm font-medium border border-gray-200 text-gray-600 text-left"
+            className="px-4 py-2 rounded-full text-sm font-medium border border-gray-200 text-gray-500 text-left"
           >
             {lang === "en" ? "切換至中文" : "Switch to English"}
           </button>
@@ -106,14 +111,14 @@ export default function NavBar() {
               <div className="flex flex-col gap-3 pt-2 border-t border-gray-100 mt-2">
                 <div className="flex items-center gap-3">
                   {user.photoURL && <Image src={user.photoURL} alt={user.displayName ?? ""} width={32} height={32} className="rounded-full" />}
-                  <span className="text-sm font-medium text-gray-700">{user.displayName}</span>
+                  <span className="text-sm font-semibold text-gray-700">{user.displayName}</span>
                 </div>
-                <button onClick={() => { signOut(); setMenuOpen(false); }} className="px-4 py-2 rounded-full text-sm font-medium border border-gray-200 text-gray-600 text-left">
+                <button onClick={() => { signOut(); setMenuOpen(false); }} className="px-4 py-2 rounded-full text-sm font-medium border border-gray-200 text-gray-500 text-left">
                   {t.signOut}
                 </button>
               </div>
             ) : (
-              <button onClick={() => { signIn(); setMenuOpen(false); }} className="px-4 py-2 rounded-full text-sm font-medium bg-[#be3a4a] text-white text-center mt-2">
+              <button onClick={() => { signIn(); setMenuOpen(false); }} className="px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-[#be3a4a] to-[#e05d45] text-white text-center mt-2">
                 {t.signIn}
               </button>
             )
